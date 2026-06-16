@@ -35,6 +35,14 @@ class ClaimSupportTests(unittest.TestCase):
 
         self.assertEqual(assessments[0].classification, "unsupported")
 
+    def test_classifies_numeric_mismatch_as_unsupported(self) -> None:
+        response = "Paris has a population of 3 million."
+        sources = ["Paris has a population of 2 million."]
+
+        assessments = classify_response_claims(response, sources)
+
+        self.assertEqual(assessments[0].classification, "unsupported")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,7 @@ import argparse
 import json
 import re
 from dataclasses import asdict, dataclass
-from typing import Iterable, List, Sequence
+from typing import Iterable, List, Optional, Sequence, Set, Tuple
 
 
 STOPWORDS = {
@@ -59,11 +59,11 @@ def _content_tokens(text: str) -> List[str]:
     return [token for token in re.findall(r"[a-z0-9]+", text.lower()) if token not in STOPWORDS]
 
 
-def _numbers(text: str) -> set[str]:
+def _numbers(text: str) -> Set[str]:
     return set(re.findall(r"\b\d+(?:\.\d+)?\b", text))
 
 
-def _anchor_tokens(text: str) -> set[str]:
+def _anchor_tokens(text: str) -> Set[str]:
     anchors = set()
     for token in re.findall(r"\b[A-Za-z0-9]+\b", text):
         if token.isdigit():
@@ -73,7 +73,7 @@ def _anchor_tokens(text: str) -> set[str]:
     return anchors
 
 
-def _bigrams(tokens: Sequence[str]) -> set[tuple[str, str]]:
+def _bigrams(tokens: Sequence[str]) -> Set[Tuple[str, str]]:
     return set(zip(tokens, tokens[1:]))
 
 
@@ -134,19 +134,17 @@ def _assess_against_source(claim: str, source: str) -> tuple[float, str]:
 
 
 def classify_claim(claim: str, source_documents: Sequence[str]) -> ClaimAssessment:
-    best_score = float("-inf")
-    best_label = "unsupported"
-    best_evidence = ""
+    best_assessment: Optional[Tuple[float, str, str]] = None
 
     for candidate in _iter_candidates(source_documents):
         score, label = _assess_against_source(claim, candidate)
-        if score > best_score:
-            best_score = score
-            best_label = label
-            best_evidence = candidate
+        if best_assessment is None or score > best_assessment[0]:
+            best_assessment = (score, label, candidate)
 
-    if best_score == float("-inf"):
-        best_score = 0.0
+    if best_assessment is None:
+        best_score, best_label, best_evidence = 0.0, "unsupported", ""
+    else:
+        best_score, best_label, best_evidence = best_assessment
 
     return ClaimAssessment(
         claim=claim,
