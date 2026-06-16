@@ -88,7 +88,7 @@ def _iter_candidates(source_documents: Iterable[str]) -> Iterable[str]:
                 yield sentence
 
 
-def _assess_against_source(claim: str, source: str) -> tuple[float, str]:
+def _assess_against_source(claim: str, source: str) -> Tuple[float, str]:
     normalized_claim = _normalize(claim)
     normalized_source = _normalize(source)
 

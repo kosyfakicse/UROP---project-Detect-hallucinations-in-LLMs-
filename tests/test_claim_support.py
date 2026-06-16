@@ -5,10 +5,10 @@ from claim_support import classify_response_claims, split_claims
 
 class ClaimSupportTests(unittest.TestCase):
     def test_split_claims_handles_sentences_and_bullets(self) -> None:
-        response = "Paris is the capital of France.\n- It has a population of 2 million."
+        response = "The sample report contains 20 records.\n- It was published in 2024."
         self.assertEqual(
             split_claims(response),
-            ["Paris is the capital of France.", "It has a population of 2 million."],
+            ["The sample report contains 20 records.", "It was published in 2024."],
         )
 
     def test_classifies_supported_claim(self) -> None:
@@ -36,8 +36,8 @@ class ClaimSupportTests(unittest.TestCase):
         self.assertEqual(assessments[0].classification, "unsupported")
 
     def test_classifies_numeric_mismatch_as_unsupported(self) -> None:
-        response = "Paris has a population of 3 million."
-        sources = ["Paris has a population of 2 million."]
+        response = "The sample report contains 30 records."
+        sources = ["The sample report contains 20 records."]
 
         assessments = classify_response_claims(response, sources)
 
